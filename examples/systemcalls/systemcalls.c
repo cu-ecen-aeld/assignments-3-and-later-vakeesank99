@@ -1,5 +1,5 @@
 #include "systemcalls.h"
-
+#define _XOPEN_SOURCE
 /**
  * @param cmd the command to execute with system()
  * @return true if the command in @param cmd was executed
@@ -16,7 +16,11 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
-
+    int rc = system(cmd);
+    if ( WIFSIGNALED(rc) && (WTERMSIG(rc) ==SIGINT || WTERMSIG(rc) == SIGQUIT)){
+        return false;
+    } 
+    
     return true;
 }
 
@@ -47,7 +51,7 @@ bool do_exec(int count, ...)
     command[count] = NULL;
     // this line is to avoid a compile warning before your implementation is complete
     // and may be removed
-    command[count] = command[count];
+    // command[count] = command[count];
 
 /*
  * TODO:
@@ -59,9 +63,41 @@ bool do_exec(int count, ...)
  *
 */
 
-    va_end(args);
+    pid_t pid;
+    pid =fork();
+    if (pid < 0) {
+        // Error occurred while forking
+        perror("fork");
+        return false;
 
-    return true;
+    }
+    /*child process*/
+    else if (pid ==0){
+        // printf("%s-----------------\n", command[0]);
+        if(execv(command[0],&command[0])==-1){
+            perror("execv");
+            exit(EXIT_FAILURE);
+        }
+    } 
+    else {
+        /*parent process*/
+        int status;
+        if(waitpid(pid, &status,0)==-1){
+            perror("waitpid");
+            return false;
+        }
+
+        if (WIFEXITED(status)){
+            if(WEXITSTATUS(status)==0){
+                // return true;
+                return true;
+            }
+            return false;
+        }
+        
+    }
+    va_end(args);
+    return false;
 }
 
 /**
@@ -82,7 +118,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     command[count] = NULL;
     // this line is to avoid a compile warning before your implementation is complete
     // and may be removed
-    command[count] = command[count];
+    // command[count] = command[count];
 
 
 /*
@@ -92,8 +128,50 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+    // int status;
+    
 
+    pid_t pid;
+    pid =fork();
+    if (pid < 0) {
+        // Error occurred while forking
+        perror("fork");
+        return false;
+
+    }
+    /*child process*/
+    else if (pid ==0){
+        int fd = open((char *)outputfile, O_WRONLY | O_TRUNC|O_CREAT,0644);
+        if (fd<0){
+            perror("open");
+            return false;
+        }
+        if(dup2(fd,STDOUT_FILENO)<0){
+            perror("dup2");
+            close(fd);
+        }
+        
+        if(execv(command[0],&command[0])==-1){
+            perror("execv");
+            exit(EXIT_FAILURE);
+        }
+    } 
+    else {
+        /*parent process*/
+        int status;
+        if(waitpid(pid, &status,0)==-1){
+            perror("waitpid");
+            return false;
+        }
+
+        if (WIFEXITED(status)){
+            if(WEXITSTATUS(status)==0){
+                // return true;
+                return true;
+            }
+            return false;
+        }
+    } 
     va_end(args);
-
-    return true;
+    return false;  
 }
