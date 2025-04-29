@@ -74,8 +74,8 @@ then
     git checkout ${BUSYBOX_VERSION}
     # TODO:  Configure busybox
     make distclean
-    # make defconfig
-    make menuconfig
+    make defconfig
+    # make menuconfig
 
 else
     cd busybox
