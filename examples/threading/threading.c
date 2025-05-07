@@ -14,7 +14,8 @@ void* threadfunc(void* thread_param)
     // TODO: wait, obtain mutex, wait, release mutex as described by thread_data structure
     // hint: use a cast like the one below to obtain thread arguments from your parameter
     struct thread_data* thread_func_args = (struct thread_data *) thread_param;
-    pthread_mutex_init(thread_func_args->mutex,NULL);
+
+    // pthread_mutex_init(thread_func_args->mutex,NULL);
     // printf("\n----- %d -----\n",thread_func_args->wait_to_obtain_ms);
     usleep(thread_func_args->wait_to_obtain_ms *1000);
     int rc = pthread_mutex_lock(thread_func_args->mutex);
@@ -23,6 +24,7 @@ void* threadfunc(void* thread_param)
         thread_func_args->thread_complete_success = false;
         // pthread_exit((void *)thread_func_args);
         // return NULL;
+        return thread_param;
         
     } 
     usleep(thread_func_args->wait_to_release_ms *1000);
@@ -30,11 +32,19 @@ void* threadfunc(void* thread_param)
     if (rc!=0){
             ERROR_LOG("pthread_mutex_unlock failed with %d\n",rc);
             thread_func_args->thread_complete_success = false;
+            // return (void *)thread_func_args;
+            return thread_param;
             // pthread_exit((void *)thread_func_args);
         }
     thread_func_args->thread_complete_success=true;
     // pthread_exit((void *)thread_func_args);
+    // rc=pthread_join(*thread_func_args->thread,NULL);
+    // if (rc!=0){
+    //     ERROR_LOG("pthread_join thread failed with %d\n",rc);
+    //     thread_func_args->thread_complete_success = false;
+    // }
     return thread_param;
+    // return (void *)thread_func_args;
 }
 
 
@@ -55,11 +65,12 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
   
     if (data ==NULL){
         ERROR_LOG("heap allocation failed\n");
-        data->thread_complete_success = false;
-        goto out;
+        // data->thread_complete_success = false;
+        return false;
+        // goto out;
     }
 
-    // struct thread_data *data; 
+    // struct thread_data *data2; 
 
     // setup mutex
     data->mutex = mutex;
@@ -72,20 +83,21 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
     if (rc!=0){
         ERROR_LOG("pthread_create failed with %d\n",rc);
         // data->thread_complete_success = false;
-        goto out;
+        return false;
     }
-
+    // data->thread_complete_success = true;
     // rc=pthread_join(*thread,NULL);
     // if (rc!=0){
     //     ERROR_LOG("pthread_join thread failed with %d\n",rc);
+    //     goto out;
     //     // data->thread_complete_success = false;
     // }
-    // goto out;
-    return data->thread_complete_success;
-out:
-    free(data);
-
-    return data->thread_complete_success;
+//     DEBUG_LOG("###############   %d ##############\n",data->thread_complete_success);
+//     return data->thread_complete_success;
+// out:
+    // free(data);
+    return true;
+    // return data->thread_complete_success;
     // return false;
 }
 
