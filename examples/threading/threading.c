@@ -14,22 +14,27 @@ void* threadfunc(void* thread_param)
     // TODO: wait, obtain mutex, wait, release mutex as described by thread_data structure
     // hint: use a cast like the one below to obtain thread arguments from your parameter
     struct thread_data* thread_func_args = (struct thread_data *) thread_param;
+    pthread_mutex_init(thread_func_args->mutex,NULL);
+    // printf("\n----- %d -----\n",thread_func_args->wait_to_obtain_ms);
     usleep(thread_func_args->wait_to_obtain_ms *1000);
-    int rc = pthread_mutex_lock(&thread_func_args->mutex);
+    int rc = pthread_mutex_lock(thread_func_args->mutex);
     if (rc!=0){
         ERROR_LOG("pthread_mutex_lock failed with %d\n",rc);
         thread_func_args->thread_complete_success = false;
-        return NULL;
+        // pthread_exit((void *)thread_func_args);
+        // return NULL;
         
     } 
     usleep(thread_func_args->wait_to_release_ms *1000);
-    rc = pthread_mutex_unlock(&thread_func_args->mutex);
+    rc = pthread_mutex_unlock(thread_func_args->mutex);
     if (rc!=0){
             ERROR_LOG("pthread_mutex_unlock failed with %d\n",rc);
             thread_func_args->thread_complete_success = false;
-    }
+            // pthread_exit((void *)thread_func_args);
+        }
     thread_func_args->thread_complete_success=true;
-    return NULL;
+    // pthread_exit((void *)thread_func_args);
+    return thread_param;
 }
 
 
@@ -57,28 +62,30 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
     // struct thread_data *data; 
 
     // setup mutex
-    pthread_mutex_init(&data->mutex,NULL);
+    data->mutex = mutex;
     data->wait_to_obtain_ms=wait_to_obtain_ms;
     data->wait_to_release_ms=wait_to_release_ms;
+    data->thread_complete_success = false;
 
     //start thread
-    int rc = pthread_create(thread, NULL, threadfunc, (void*) &data);
+    int rc = pthread_create(thread, NULL, threadfunc, (void*)data);
     if (rc!=0){
         ERROR_LOG("pthread_create failed with %d\n",rc);
-        data->thread_complete_success = false;
+        // data->thread_complete_success = false;
         goto out;
     }
-    DEBUG_LOG("join done\n");
-    rc=pthread_join(*thread,NULL);
-   
-    if (rc!=0){
-        ERROR_LOG("pthread_join thread %u failed with %d\n",(unsigned int )*thread,rc);
-        data->thread_complete_success = false;
-    }
-    goto out;
+
+    // rc=pthread_join(*thread,NULL);
+    // if (rc!=0){
+    //     ERROR_LOG("pthread_join thread failed with %d\n",rc);
+    //     // data->thread_complete_success = false;
+    // }
+    // goto out;
+    return data->thread_complete_success;
 out:
     free(data);
 
     return data->thread_complete_success;
+    // return false;
 }
 
