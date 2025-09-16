@@ -2,6 +2,8 @@
 
 #writer: writer.o
 #	$(CROSS_COMPILE)gcc -Wall -o writer writer.o
+.PHONY: all
+all: writer
 writer:writer.c
 	$(CROSS_COMPILE)gcc  -Wall -o writer writer.c
 
