@@ -1,4 +1,4 @@
-CROSS_COMPILE=aarch64-linux-gnu-
+#CROSS_COMPILE=aarch64-linux-gnu-
 
 all: writer
 writer: writer.o
