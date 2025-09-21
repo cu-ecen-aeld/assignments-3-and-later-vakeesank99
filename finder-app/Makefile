@@ -4,11 +4,8 @@ CC ?= $(CROSS_COMPILE)gcc
 
 all: writer
 
-writer: writer.o
-	$(CC) -Wall -o writer writer.o
-
-writer.o: writer.c
-	$(CC) -Wall -c -o writer.o writer.c
+writer: writer.c
+	$(CC) -Wall -c -o writer writer.c
 
 clean:
 	rm -f *.o writer
