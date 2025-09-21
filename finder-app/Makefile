@@ -1,11 +1,11 @@
-#CROSS_COMPILE=?
+CROSS_COMPILE=?
 
-#writer: writer.o
-#	$(CROSS_COMPILE)gcc -Wall -o writer writer.o
-.PHONY: all
 all: writer
+writer: writer.o
+	$(CROSS_COMPILE)gcc -Wall -o writer writer.o
+
 writer:writer.c
-	$(CROSS_COMPILE)gcc  -Wall -o writer writer.c
+	$(CROSS_COMPILE)gcc  -Wall -o writer.o writer.c
 
 .PHONY: clean
 clean:
