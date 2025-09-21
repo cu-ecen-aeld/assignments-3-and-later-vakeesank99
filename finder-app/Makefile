@@ -8,7 +8,7 @@ writer: writer.o
 	$(CC) -Wall -o writer writer.o
 
 writer.o: writer.c
-	$(CC) -Wall -o writer.o writer.c
+	$(CC) -Wall -c -o writer.o writer.c
 
 clean:
 	rm -f *.o writer
