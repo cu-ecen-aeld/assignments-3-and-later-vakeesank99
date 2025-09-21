@@ -7,8 +7,8 @@ set -u
 
 NUMFILES=10
 WRITESTR=AELD_IS_FUN
-WRITEDIR=/etc/finder-app/conf  #/tmp/aeld-data
-username=$(cat conf/username.txt)
+WRITEDIR=/tmp
+username=$(cat /etc/finder-app/conf/username.txt)
 
 if [ $# -lt 3 ]
 then
@@ -52,15 +52,15 @@ fi
 # make clean
 # make
 
-for i in $( seq 1 $NUMFILES)
-do
-	./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
-done
+#for i in $( seq 1 $NUMFILES)
+#do
+./writer "$WRITEDIR/assignment4-result.txt" "$WRITESTR"
+#done
 
 OUTPUTSTRING=$(./finder.sh "$WRITEDIR" "$WRITESTR")
-./writer "/tmp/assignment4-result.txt" "${OUTPUTSTRING}"
+#./writer "/tmp/assignment4-result.txt" "${OUTPUTSTRING}"
 # remove temporary directories
-rm -rf /tmp/aeld-data
+rm /tmp/assignment4-result.txt
 
 set +e
 echo ${OUTPUTSTRING} | grep "${MATCHSTR}"
