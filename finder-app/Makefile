@@ -4,7 +4,7 @@ all: writer
 writer: writer.o
 	$(CROSS_COMPILE)gcc -Wall -o writer writer.o
 
-writer:writer.c
+writer.o: writer.c
 	$(CROSS_COMPILE)gcc  -Wall -o writer.o writer.c
 
 .PHONY: clean
